@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Из раннего — Сборник</title>
+<style>
+  :root{
+    --bg:#0f1115; --bg2:#1c212b; --card:#242a36;
+    --accent:#8ba1c4; --accent2:#5a7399; --text:#e2e8f0;
+    --muted:#7a8b9e; --glow:rgba(139,161,196,.3);
+  }
+  body.theme-light {
+    --bg:#1a120b; --bg2:#2a1d12; --card:#2e2015;
+    --accent:#f0a04b; --accent2:#e07a3f; --text:#fdf6ec;
+    --muted:#c9b8a3; --glow:rgba(240,160,75,.35);
+  }
+  
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg2) 0%,var(--bg) 65%);
+    color:var(--text); min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; padding:24px 16px 48px; gap:24px;
+    width: 100%; max-width: 100vw; overflow-x: hidden;
+    -webkit-user-select: none; user-select: none;
+    transition: background 0.6s ease, color 0.6s ease;
+  }
+
+  .top-bar { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 12px; align-items: center;}
+  
+  .hint-text {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    animation: pulse 2s infinite;
+    text-shadow: 0 0 10px var(--glow);
+  }
+  @keyframes pulse {
+    0% { opacity: 0.7; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-3px); }
+    100% { opacity: 0.7; transform: translateY(0); }
+  }
+
+  .albums-nav { 
+    display: flex; gap: 8px; justify-content: center; width: 100%;
+    background: rgba(0,0,0,0.2); padding: 8px; border-radius: 20px; 
+    border: 2px solid rgba(255,255,255,.1); 
+    transition: border-color 0.6s ease;
+  }
+  .albums-nav button { 
+    flex: 1; background: transparent; border: 2px solid transparent; 
+    color: var(--muted); padding: 12px 10px; border-radius: 14px; 
+    font-weight: 800; font-size: 14px; cursor: pointer; 
+    transition: all .3s ease; text-transform: uppercase; text-align: center;
+  }
+  .albums-nav button:not(.active) { border-color: rgba(255,255,255,.1); }
+  .albums-nav button:not(.active):hover { border-color: var(--accent); color: var(--text); }
+  .albums-nav button.active { 
+    background: linear-gradient(135deg,var(--accent),var(--accent2)); 
+    color: #fff; 
+    box-shadow: 0 4px 15px var(--glow); 
+    border-color: transparent;
+  }
+
+  .album { text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:600px; }
+  .album__cover { width:min(280px,72vw); aspect-ratio:1/1; border-radius:22px; object-fit:cover; box-shadow:0 24px 70px var(--glow); border:2px solid rgba(255,255,255,.2); pointer-events: none; transition: box-shadow 0.6s ease, border-color 0.6s ease; }
+  .album__title { font-size:clamp(26px,6vw,44px); font-weight:800; letter-spacing:.02em; color: #fff; text-shadow: 0 0 20px var(--glow); line-height: 1.1; }
+  .album__sub { color:var(--accent); font-size:16px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; transition: color 0.6s ease; }
+
+  .carousel { width:100%; max-width:960px; display:flex; gap:18px; overflow-x:auto; padding:10px 8px 20px; scroll-snap-type:x mandatory; scrollbar-width:thin; scrollbar-color:var(--accent) transparent; }
+  .carousel::-webkit-scrollbar { height:8px; }
+  .carousel::-webkit-scrollbar-thumb { background:var(--accent); border-radius:4px; transition: background 0.6s ease; }
+  
+  .track { flex:0 0 auto; width:170px; scroll-snap-align:center; background:var(--card); border-radius:18px; padding:10px; cursor:pointer; transition:transform .2s, box-shadow .2s, border-color .2s, background 0.6s ease; border:2px solid transparent; text-align:center; }
+  .track:hover { transform:translateY(-6px); }
+  .track.active { border-color:var(--accent); box-shadow:0 0 0 4px rgba(255,255,255,.1), 0 12px 30px var(--glow); }
+  
+  .track__cover { width:100%; aspect-ratio:1/1; border-radius:12px; object-fit:cover; display:block; margin-bottom:10px; background:var(--bg2); pointer-events: none; }
+  .track__num { font-size:11px; color:var(--accent); font-weight:800; letter-spacing:.1em; margin-bottom:2px; transition: color 0.6s ease; }
+  .track__name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  
+  .player { width:100%; max-width:600px; background:var(--card); border-radius:22px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 12px 40px rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.1); transition: background 0.6s ease, border-color 0.6s ease; }
+  .player__now { display:flex; align-items:center; gap:14px; }
+  .player__cover { width:68px; height:68px; border-radius:14px; object-fit:cover; background:var(--bg2); border:1px solid var(--accent); pointer-events: none; transition: border-color 0.6s ease; }
+  .player__info { overflow:hidden; flex:1; }
+  .player__title { font-weight:700; font-size:15px; line-height:1.25; margin-bottom:2px; }
+  .player__artist { color:var(--muted); font-size:13px; transition: color 0.6s ease; }
+  .player audio { width:100%; outline: none; }
+  
+  .player__nav { display:flex; justify-content:center; gap:12px; }
+  .player__nav button { background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#fff; padding:10px 22px; border-radius:12px; font-weight:700; cursor:pointer; transition:filter .15s, background 0.6s ease; }
+  .player__nav button:hover { filter:brightness(1.1); }
+</style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <!-- Вот она, подсказка! -->
+    <div class="hint-text">👇 У нас есть ещё один том! 👇</div>
+    
+    <div class="albums-nav" id="albumsNav">
+      <button class="active" data-album="0">Том 1: Очевидное</button>
+      <button data-album="1">Том 2: Светлое</button>
+    </div>
+  </div>
+
+  <section class="album">
+    <img class="album__cover" id="albumCover" src="cover-1.jpg" alt="Обложка">
+    <h1 class="album__title" id="albumTitle">Очевидное</h1>
+    <p class="album__sub" id="albumSub">Из раннего • Том 1</p>
+  </section>
+
+  <div class="carousel" id="carousel"></div>
+
+  <div class="player">
+    <div class="player__now">
+      <img class="player__cover" id="playerCover" src="cover-1.jpg" alt="Cover">
+      <div class="player__info">
+        <div class="player__title" id="playerTitle">Выбери песню</div>
+        <div class="player__artist" id="playerArtist">Из раннего</div>
+      </div>
+    </div>
+    <audio id="audio" controls controlslist="nodownload" preload="none"></audio>
+    <div class="player__nav">
+      <button id="prevBtn">⏮ Пред</button>
+      <button id="nextBtn">След ⏭</button>
+    </div>
+  </div>
+
+<script>
+  const collection = [
+    {
+      id: 0, title: "Очевидное", subtitle: "Из раннего • Том 1", cover: "cover-1.jpg", theme: "",
+      tracks: [
+        "Очевидный ответ",
+        "Хрупкий баланс",
+        "Тихая преданность",
+        "Дистанция помощи",
+        "Единство Красоты",
+        "Шёпот сердца",
+        "Главный разговор",
+        "Закрытая дверь"
+      ]
+    },
+    {
+      id: 1, title: "Светлое", subtitle: "Из раннего • Том 2", cover: "cover-2.jpg", theme: "theme-light",
+      tracks: [
+        "Всё для тебя",
+        "Счастье быть рядом",
+        "Право на искренность",
+        "Сила в поступках",
+        "Просто слышать",
+        "Беречь тепло",
+        "Тихая беседа",
+        "Секунды до встречи",
+        "Запах варенья",
+        "Тот, кто выбрал тебя"
+      ]
+    }
+  ];
+
+  let currentAlbumIndex = 0;
+  let currentTrack = -1;
+
+  const carousel    = document.getElementById('carousel');
+  const audio       = document.getElementById('audio');
+  const playerCover = document.getElementById('playerCover');
+  const playerTitle = document.getElementById('playerTitle');
+  const playerArtist= document.getElementById('playerArtist');
+  const albumCover  = document.getElementById('albumCover');
+  const albumTitle  = document.getElementById('albumTitle');
+  const albumSub    = document.getElementById('albumSub');
+  const albumsNav   = document.getElementById('albumsNav');
+
+  const getAlbum = () => collection[currentAlbumIndex];
+  const pad = (n) => String(n).padStart(2,'0');
+  
+  const getFileIndex = (trackIndex) => {
+    return currentAlbumIndex === 0 ? trackIndex + 1 : trackIndex + 9;
+  };
+
+  const coverPath = (trackIndex) => {
+    const fileNum = pad(getFileIndex(trackIndex));
+    return `covers/${fileNum}.jpg`;
+  };
+  
+  const songPath = (trackIndex) => {
+    const fileNum = pad(getFileIndex(trackIndex));
+    return `songs/${fileNum}.mp3`;
+  };
+
+  function renderCarousel(){
+    carousel.innerHTML = '';
+    getAlbum().tracks.forEach((name, i) => {
+      const el = document.createElement('div');
+      el.className = 'track' + (i === currentTrack ? ' active' : '');
+      el.dataset.index = i;
+      el.innerHTML = `
+        <img class="track__cover" src="${coverPath(i)}" alt="${name}">
+        <div class="track__num">ТРЕК №${getFileIndex(i)}</div>
+        <div class="track__name">${name}</div>
+      `;
+      el.addEventListener('click', () => play(i));
+      carousel.appendChild(el);
+    });
+  }
+
+  function updateHeader() {
+    const album = getAlbum();
+    albumCover.src = album.cover;
+    albumTitle.textContent = album.title;
+    albumSub.textContent = album.subtitle;
+    
+    if (album.theme) {
+      document.body.classList.add(album.theme);
+    } else {
+      document.body.classList.remove('theme-light');
+    }
+  }
+
+  function play(i){
+    if (i < 0) i = getAlbum().tracks.length - 1;
+    if (i >= getAlbum().tracks.length) i = 0;
+
+    currentTrack = i;
+    const trackName = getAlbum().tracks[i];
+
+    playerCover.src = coverPath(i);
+    playerTitle.textContent = trackName;
+
+    [...carousel.querySelectorAll('.track')].forEach((el, idx) => el.classList.toggle('active', idx === i));
+    carousel.children[i]?.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+
+    audio.src = songPath(i);
+    audio.play().catch(()=>{});
+  }
+
+  function switchAlbum(index) {
+    if (currentAlbumIndex === index) return;
+    currentAlbumIndex = index;
+    
+    [...albumsNav.children].forEach((btn, i) => btn.classList.toggle('active', i === index));
+    
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+    currentTrack = -1;
+    playerCover.src = getAlbum().cover;
+    playerTitle.textContent = "Выбери песню";
+
+    updateHeader();
+    renderCarousel();
+    carousel.scrollTo({ left: 0, behavior: 'smooth' });
+  }
+
+  [...albumsNav.children].forEach((btn, index) => {
+    btn.addEventListener('click', () => switchAlbum(index));
+  });
+
+  document.getElementById('prevBtn').onclick = () => play(currentTrack - 1);
+  document.getElementById('nextBtn').onclick = () => play(currentTrack + 1);
+  audio.addEventListener('ended', () => play(currentTrack + 1));
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  updateHeader();
+  renderCarousel();
+</script>
+</body>
+</html>
